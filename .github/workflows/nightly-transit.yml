@@ -5,7 +5,7 @@ on:
     branches: [main, jason]
     paths: ['tests/**', '.github/workflows/nightly-transit.yml']
   schedule:
-    - cron: '17 3 * * *'
+    - cron: '*/5 * * * *'
       timezone: America/Toronto
 permissions:
   contents: read
