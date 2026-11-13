@@ -46,6 +46,8 @@ The optional live browser check loads production with the actual CDN/map/feed de
 
 ## Fork CI
 
+Open the fork's [Actions tab](https://github.com/jnguyen1098/guelph-transit-map/actions) to see runs. Select a run, then a job, to inspect failing steps and logs; downloadable reports and traces appear under **Artifacts** on the run summary. Both workflows also offer **Run workflow** for a manual check. Application-only pushes do not match the current test-tooling path filters; use manual dispatch for immediate verification after an application sync.
+
 The workflows are restricted to `jnguyen1098/guelph-transit-map`. They have `contents: read`, no secrets, no pull-request trigger, one browser worker, zero automatic test retries, and bounded job/artifact retention. Product failures intentionally make the nightly job red.
 
 - **Nightly transit tests**: 03:17 in `America/Toronto`; serial `baseline`/`main`/`pr18` matrix; seven-day evidence retention; 20-minute job limit.
