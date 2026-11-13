@@ -5,7 +5,7 @@ on:
     branches: [main, jason]
     paths: ['tests/live.mjs', 'tests/support/**', '.github/workflows/hourly-transit.yml']
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '37 * * * *'
       timezone: America/Toronto
 permissions:
   contents: read
