@@ -1,0 +1,42 @@
+name: Hourly transit smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, jason]
+    paths: ['tests/live.mjs', 'tests/support/**', '.github/workflows/hourly-transit.yml']
+  schedule:
+    - cron: '37 * * * *'
+      timezone: America/Toronto
+permissions:
+  contents: read
+concurrency:
+  group: transit-live-smoke
+  cancel-in-progress: false
+jobs:
+  smoke:
+    if: github.repository == 'jnguyen1098/guelph-transit-map'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Check public production GET endpoints
+        run: node tests/live.mjs
+      - name: Preserve responses and coverage manifest
+        if: always() && env.TRANSIT_TEST_BASE != ''
+        uses: actions/upload-artifact@v5
+        with:
+          name: transit-live-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.TRANSIT_TEST_BASE }}/artifacts
+          if-no-files-found: error
+          retention-days: 2
+      - name: Remove owned test state
+        if: always()
+        run: node tests/run.mjs cleanup

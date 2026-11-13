@@ -1,0 +1,62 @@
+name: Nightly transit tests
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, jason]
+    paths: ['tests/**', '.github/workflows/nightly-transit.yml']
+  schedule:
+    - cron: '17 3 * * *'
+      timezone: America/Toronto
+permissions:
+  contents: read
+concurrency:
+  group: transit-e2e-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  browser:
+    if: github.repository == 'jnguyen1098/guelph-transit-map'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        target: [baseline, main, pr18]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install pinned browser tooling
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: tests
+      - name: Install headless Chromium
+        run: npx --no-install playwright install --with-deps chromium
+        working-directory: tests
+      - name: Fetch upstream comparison targets without changing upstream
+        run: git fetch --no-tags https://github.com/BenFort/guelph-transit-map.git +refs/heads/main:refs/remotes/origin/main +refs/pull/18/head:refs/remotes/origin/pr/18
+      - name: Test harness safety guards
+        run: npm test
+        working-directory: tests
+      - name: Prepare isolated application
+        run: node tests/run.mjs prepare ${{ matrix.target }}
+      - name: Exercise real browser workflows
+        run: node tests/run.mjs exercise
+      - name: Preserve reports and failure traces
+        if: always() && env.TRANSIT_TEST_BASE != ''
+        uses: actions/upload-artifact@v5
+        with:
+          name: transit-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.TRANSIT_TEST_BASE }}/artifacts
+          if-no-files-found: error
+          retention-days: 7
+      - name: Remove owned test state
+        if: always()
+        run: node tests/run.mjs cleanup
