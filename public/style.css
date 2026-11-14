@@ -405,3 +405,182 @@ p
     text-align: right;
     margin-top: 16px;
 }
+
+@media (max-width: 600px), (max-width: 900px) and (pointer: coarse)
+{
+    .sidePanel
+    {
+        width: min(340px, calc(100vw - 94px));
+    }
+
+    .rcorners
+    {
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    #siteControlsDiv h1
+    {
+        font-size: 20px;
+        margin: 0 0 4px;
+    }
+
+    #siteControlsDiv br
+    {
+        display: none;
+    }
+
+    #countdownHeading
+    {
+        font-size: 13px;
+        margin: 0;
+    }
+
+    #siteControlsDiv hr
+    {
+        margin: 6px 0;
+    }
+
+    #siteControlsDiv .toggleButton
+    {
+        width: calc(50% - 6px);
+        min-height: 44px;
+        margin: 3px;
+        padding: 6px 4px;
+        font-size: 13px;
+        line-height: 20px;
+    }
+
+    #siteControlsDiv #toggleStopsButton
+    {
+        width: calc(100% - 6px);
+    }
+
+    .mapTypeControl
+    {
+        flex-direction: column;
+    }
+
+    .mapTypeControl button
+    {
+        width: 60px;
+        min-height: 44px;
+        height: auto;
+        padding: 8px 4px;
+        font-size: 13px;
+    }
+
+    .mobile .stopSearchInput,
+    .mobile .stopSearchResult,
+    .mobile .arrivalRow,
+    .mobile .busStatus
+    {
+        font-size: 16px;
+    }
+
+    .mobile .stopSearchResult
+    {
+        min-height: 44px;
+    }
+
+    .mobile .stopSearchResultRoutes,
+    .mobile .stopSearchEmpty,
+    .mobile .nextStopsHeading
+    {
+        font-size: 14px;
+    }
+
+    .mobile .infoCardTitle
+    {
+        font-size: 18px;
+    }
+
+    .mobile .infoCardCloseButton
+    {
+        flex-shrink: 0;
+        width: 44px;
+        min-height: 44px;
+        font-size: 32px;
+    }
+
+    .rcorners.infoCard
+    {
+        padding: 12px;
+    }
+
+    .arrivalRow
+    {
+        gap: 8px;
+    }
+
+    .buttonDiv
+    {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        width: calc(100% - 20px);
+        margin: 0 10px 10px;
+        padding: 6px;
+        min-height: 66px;
+        max-height: min(220px, var(--available-height, 220px));
+    }
+
+    .buttonDiv .button
+    {
+        width: 100%;
+        height: 54px;
+        margin: 0;
+        padding: 4px;
+        font-size: 14px;
+        line-height: 18px;
+    }
+
+    .aboutDialog
+    {
+        min-width: 0;
+        width: calc(100vw - 24px);
+        max-width: 600px;
+        max-height: calc(100dvh - 24px);
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .aboutDialogTitle
+    {
+        font-size: 24px;
+    }
+
+    .aboutDialogBody
+    {
+        font-size: 16px;
+        overflow-wrap: anywhere;
+    }
+
+    .aboutDialog .toggleButton
+    {
+        min-height: 44px;
+    }
+
+    .alertsDiv
+    {
+        padding: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .alertsDiv h1
+    {
+        font-size: 24px;
+    }
+
+    .alertsDiv h2
+    {
+        font-size: 18px;
+    }
+
+    .alertsDiv h4,
+    .alertsDiv p
+    {
+        white-space: normal;
+        font-size: 14px;
+    }
+}
