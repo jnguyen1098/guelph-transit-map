@@ -1,6 +1,6 @@
 # Transit end-to-end tests
 
-This suite exercises the unchanged application in a real headless Chromium browser. It tests a fixed pre-PR18 baseline, current upstream `main`, and PR #18's head, records their exact commit IDs, and keeps actual defects as failing tests. No API keys, paid services, Docker, user browser profiles, or production writes are required.
+This suite exercises the application in a real headless Chromium browser. The default `current` target tests the checked-out commit. Explicit comparison targets retain a fixed pre-PR18 baseline, upstream `main`, and PR #18's head. Reports record exact commit IDs and actual defects remain failing tests. No API keys, paid services, Docker, user browser profiles, or production writes are required.
 
 ## Run locally
 
@@ -8,12 +8,13 @@ Use Node 24 LTS, npm, Git, Python 3, and `tar`. Windows includes `tar`; Linux ne
 
 ```text
 node tests/run.mjs setup
+node tests/run.mjs check current
 node tests/run.mjs check baseline
 node tests/run.mjs check main
 node tests/run.mjs check pr18
 ```
 
-`setup` installs the locked test tooling and Chromium, then fetches the two upstream refs. To update only the comparison targets, run `node tests/run.mjs refresh`. The check commands copy the selected commit into an owned temporary directory under `tests/`, install that snapshot's locked application dependencies, and start Express on an ephemeral loopback port. They preserve evidence in the existing `review/evidence/` surface and remove runtime state even when tests fail. They never check out another branch or launch a visible window.
+`setup` installs the locked test tooling and Chromium, then fetches the two upstream refs. To update only the comparison targets, run `node tests/run.mjs refresh`. `check` without a target defaults to `current`; `check main` deliberately selects upstream, which can differ from the fork. The check commands copy the selected commit into an owned temporary directory under `tests/`, install that snapshot's locked application dependencies, and start Express on an ephemeral loopback port. They preserve evidence in the existing `review/evidence/` surface and remove runtime state even when tests fail. They never check out another branch or launch a visible window.
 
 For three independent executions of each case, run `node tests/run.mjs check pr18 repeatedly` (or substitute `main`). Repetition does not turn failures into passes; retries remain disabled.
 
@@ -46,12 +47,13 @@ The optional live browser check loads production with the actual CDN/map/feed de
 
 ## Fork CI
 
-Open the fork's [Actions tab](https://github.com/jnguyen1098/guelph-transit-map/actions) to see runs. Select a run, then a job, to inspect failing steps and logs; downloadable reports and traces appear under **Artifacts** on the run summary. Both workflows also offer **Run workflow** for a manual check. Application-only pushes do not match the current test-tooling path filters; use manual dispatch for immediate verification after an application sync.
+Open the fork's [Actions tab](https://github.com/jnguyen1098/guelph-transit-map/actions) to see runs. Select a run, then a job, to inspect failing steps and logs; downloadable reports and traces appear under **Artifacts** on the run summary. Both workflows also offer **Run workflow** for a manual check. Browser CI runs for application, dependency, fixture, test and workflow changes on fork `main`/`jason`.
 
-The workflows are restricted to `jnguyen1098/guelph-transit-map`. They have `contents: read`, no secrets, no pull-request trigger, one browser worker, zero automatic test retries, and bounded job/artifact retention. Product failures intentionally make the nightly job red.
+The workflows are restricted to `jnguyen1098/guelph-transit-map`. They have `contents: read`, no secrets, no pull-request trigger, one browser worker, zero automatic test retries, and bounded job/artifact retention. Product failures intentionally make the nightly job red. Normal browser runs select `current` at `HEAD` and refuse a source SHA different from the triggering GitHub commit; `target.json` records both values. All console, exception, layout and rider-workflow assertions stay strict.
 
-- **Nightly transit tests**: 03:17 in `America/Toronto`; serial `baseline`/`main`/`pr18` matrix; seven-day evidence retention; 20-minute job limit.
+- **Nightly transit tests**: 03:17 in `America/Toronto`; test the exact checked-out fork revision; seven-day evidence retention; 20-minute job limit.
 - **Hourly transit smoke**: minute :37 in `America/Toronto`; six production HTTP GETs; two-day evidence retention; five-minute job limit.
 - Manual dispatch and relevant pushes to fork `main`/`jason` are supported. Scheduled workflows must be on the fork's default branch and Actions must be enabled. GitHub schedules can be delayed or dropped, and public repositories can have schedules disabled after 60 days of inactivity.
+- Enable **historical_comparisons** in a manual browser run to test `current`, `baseline`, upstream `main`, and `pr18` serially. Old snapshots retain their original defects and can make that explicit comparison run red. Their failures are not suppressed or counted as current-code failures.
 
-The workflows are published on Jason's fork; BenFort's repository is unchanged. Hosted push-triggered runs verified installation, source selection, all five native guards, browser execution, artifact upload/download and cleanup. The nightly workflow remains red for existing application defects. See `docs/findings/2026-11-13-fork-ci.md` for run links and exact outcomes. A temporary five-minute cadence was tested and then restored to the schedules above; no actual schedule-triggered run was observed within that bounded window, so cron delivery remains unverified. A push-triggered pass does not establish it.
+The workflows are published on Jason's fork. Initial runs selected upstream/historical snapshots and exposed the missing header script and mobile viewport defects; the fork now contains the locally verified fixes. See `docs/findings/2026-11-13-fork-ci.md` and `docs/findings/2026-11-14-viewport-fix.md` for run links and exact outcomes. Actual scheduled runs were observed on November 14, including successful hourly smoke runs and the earlier nightly comparison failure. Normal cadences remain as listed above.

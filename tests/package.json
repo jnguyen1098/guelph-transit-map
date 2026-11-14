@@ -2,7 +2,7 @@
   "name": "guelph-transit-map-e2e",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test unit/*.test.mjs", "check": "node run.mjs check main" },
+  "scripts": { "test": "node --test unit/*.test.mjs", "check": "node run.mjs check current" },
   "dependencies": {
     "@playwright/test": "1.64.1",
     "@fontsource/roboto": "5.3.0",

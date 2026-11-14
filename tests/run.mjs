@@ -4,15 +4,16 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createOwned, disposeOwned } from './support/safety.mjs';
 import { createHash } from 'node:crypto';
-import { targetSettings } from './support/targets.mjs';
+import { targetSettings, verifyTargetCommit } from './support/targets.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(root);
-const [command = 'check', target = 'main', frequency = 'once'] = process.argv.slice(2);
+const [command = 'check', target = 'current', frequency = 'once'] = process.argv.slice(2);
 if (!['once', 'repeatedly'].includes(frequency)) throw Error('Frequency must be once or repeatedly');
 function prepare() {
   const { ref, schedules } = targetSettings(target);
   const sha = execFileSync('git', ['rev-parse', ref], { cwd: repo, encoding: 'utf8' }).trim();
+  verifyTargetCommit(target, sha, process.env.GITHUB_SHA);
   // Windows Python must never read Codex intermediates from AppData/Temp.
   const base = createOwned(root);
   Object.assign(process.env, { TMPDIR: base, TEMP: base, TMP: base });
@@ -28,7 +29,7 @@ function prepare() {
     writeFileSync(join(base, 'artifacts/npm-install.log'), result.stdout + result.stderr);
     if (result.status !== 0) throw Error(`App dependency install failed: ${result.stderr}`);
     const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
-    writeFileSync(join(base, 'artifacts/target.json'), JSON.stringify({ target, ref, sha, schedules, node: process.version, platform: process.platform,
+    writeFileSync(join(base, 'artifacts/target.json'), JSON.stringify({ target, ref, sha, schedules, ciTriggerSha: process.env.GITHUB_SHA ?? null, node: process.version, platform: process.platform,
       fixture: '2026-11-04 bounded derivative', fixtureSha256: hash(join(root, 'fixtures/transit.json')), toolingLockSha256: hash(join(root, 'package-lock.json')) }, null, 2));
     process.env.TRANSIT_TEST_BASE = base;
     process.env.TRANSIT_TARGET = target;
@@ -70,4 +71,4 @@ if (command === 'refresh') {
     cpSync(join(base, 'artifacts'), evidence, { recursive: true });
     console.log(`Evidence: ${evidence}`);
   } finally { disposeOwned(base); }
-} else throw Error('Use setup, refresh, check main, check pr18, prepare main, exercise, or cleanup');
+} else throw Error('Use setup, refresh, check current, check baseline, check main, check pr18, prepare current, exercise, or cleanup');

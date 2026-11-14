@@ -1,9 +1,14 @@
 name: Nightly transit tests
 on:
   workflow_dispatch:
+    inputs:
+      historical_comparisons:
+        description: 'Also test old baseline and upstream versions (known defects may fail)'
+        type: boolean
+        default: false
   push:
     branches: [main, jason]
-    paths: ['tests/**', '.github/workflows/nightly-transit.yml']
+    paths: ['app.js', 'public/**', 'gtfs-realtime.proto', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/nightly-transit.yml']
   schedule:
     - cron: '17 3 * * *'
       timezone: America/Toronto
@@ -21,7 +26,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        target: [baseline, main, pr18]
+        target: ${{ fromJSON(inputs.historical_comparisons && '["current","baseline","main","pr18"]' || '["current"]') }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -41,6 +46,7 @@ jobs:
         run: npx --no-install playwright install --with-deps chromium
         working-directory: tests
       - name: Fetch upstream comparison targets without changing upstream
+        if: matrix.target != 'current'
         run: git fetch --no-tags https://github.com/BenFort/guelph-transit-map.git +refs/heads/main:refs/remotes/origin/main +refs/pull/18/head:refs/remotes/origin/pr/18
       - name: Test harness safety guards
         run: npm test
