@@ -292,7 +292,7 @@ async function InitializeMap()
     
     if (isMobile())
     {
-        iconSize = 100;
+        iconSize = 60;
         stopIconSize = [43, 60];
         map.getContainer().classList.add(CSS_CLASS_MOBILE);
         fullscreenControlDiv.classList.add('hidden');
